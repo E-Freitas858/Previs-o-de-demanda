@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adega - Previsão de Demanda</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div id="loginView" class="auth-screen">
+      <div class="login-card">
+        <div class="brand">
+          <span class="brand-badge">A</span>
+          <h1>Adega Demandas</h1>
+        </div>
+
+        <form id="loginForm">
+          <label>
+            Usuário
+            <input id="username" type="text" value="adega" required />
+          </label>
+
+          <label>
+            Senha
+            <input id="password" type="password" value="adega123" required />
+          </label>
+
+          <button type="submit">Entrar</button>
+        </form>
+
+        <p class="helper-text">Credenciais padrão: adega / adega123</p>
+        <p id="loginError" class="error" aria-live="polite"></p>
+      </div>
+    </div>
+
+    <div id="dashboardView" class="dashboard hidden">
+      <header class="topbar">
+        <div>
+          <p class="eyebrow">Modelo preditivo</p>
+          <h1>Adega Predictiva</h1>
+        </div>
+
+        <button id="logoutBtn" class="secondary">Sair</button>
+      </header>
+
+      <p class="subtitle">
+        Previsão diária de receita, itens e fluxo de clientes por parte de 27/08 a 31/08, combinando sazonalidade, tendência e clima.
+      </p>
+
+      <section class="stats-grid">
+        <article class="stat-card">
+          <span class="label">Receita histórica</span>
+          <strong id="historicalRevenueValue" class="value">R$ 106.341</strong>
+          <small id="historicalRevenueMeta">31 dias úteis</small>
+        </article>
+
+        <article class="stat-card accent">
+          <span class="label">Previsão <span id="forecastDaysLabel">7 dias</span></span>
+          <strong id="forecastTotalValue" class="value">R$ 32.749</strong>
+          <small id="forecastTrendText">+13,4% vs. média</small>
+        </article>
+
+        <article class="stat-card">
+          <span class="label">Itens a repor</span>
+          <strong id="reorderValue" class="value">2.550</strong>
+          <small id="reorderDelta">+180 itens</small>
+        </article>
+
+        <article class="stat-card highlight">
+          <span class="label">Precisão do modelo</span>
+          <strong id="accuracyValue" class="value">R² 0,97</strong>
+          <small id="accuracyDelta">erro médio 3,2%</small>
+        </article>
+      </section>
+
+      <section class="panel chart-panel">
+        <div class="panel-head">
+          <h3>Receita histórica e previsão</h3>
+        </div>
+
+        <div class="chart-area">
+          <svg id="salesForecastChart" viewBox="0 0 760 260" role="img" aria-label="Gráfico de linha da previsão de vendas"></svg>
+        </div>
+
+        <div class="chart-legend">
+          <span><i class="legend-dot pink"></i> Histórico</span>
+          <span><i class="legend-dot gold"></i> Previsão</span>
+        </div>
+      </section>
+
+      <section class="simulator panel">
+        <div class="panel-head">
+          <h3>Simulador de cenário</h3>
+        </div>
+
+        <div class="simulate-row single">
+          <div class="range-header">
+            <label>Horizonte de previsão</label>
+            <strong id="horizonValue">7 dias</strong>
+          </div>
+          <div class="range-shell">
+            <input id="horizonRange" type="range" min="3" max="15" value="7" />
+          </div>
+        </div>
+      </section>
+
+      <section class="panel filter-panel">
+        <div class="panel-head">
+          <h3>Consultar dia específico</h3>
+        </div>
+
+        <div class="filter-row">
+          <label for="daySearchInput">Selecione a data</label>
+          <input id="daySearchInput" type="date" />
+          <button id="clearDayFilterBtn" class="secondary" type="button">Voltar ao modo normal</button>
+        </div>
+
+        <p id="dayDetailSummary" class="day-summary">Exibindo todos os dias do horizonte.</p>
+      </section>
+
+      <section class="lower-grid">
+        <article class="panel small-panel">
+          <div class="panel-head">
+            <h3>Perfil da dia da semana</h3>
+          </div>
+
+          <div class="bars">
+            <div class="bar-wrap"><span>Dom</span><div class="bar pink" style="height: 32%"></div></div>
+            <div class="bar-wrap"><span>Seg</span><div class="bar pink" style="height: 42%"></div></div>
+            <div class="bar-wrap"><span>Ter</span><div class="bar pink" style="height: 48%"></div></div>
+            <div class="bar-wrap"><span>Qua</span><div class="bar pink" style="height: 52%"></div></div>
+            <div class="bar-wrap"><span>Qui</span><div class="bar pink" style="height: 62%"></div></div>
+            <div class="bar-wrap"><span>Sex</span><div class="bar gold" style="height: 78%"></div></div>
+            <div class="bar-wrap"><span>Sáb</span><div class="bar gold" style="height: 84%"></div></div>
+          </div>
+
+          <p class="foot-note">Base de dados: 9.486 clientes.</p>
+        </article>
+
+        <article class="panel small-panel">
+          <div class="panel-head">
+            <h3>Receita por categoria</h3>
+          </div>
+
+          <div id="categoryList" class="category-list">
+            <div class="category-item" data-category="Cervejas">
+              <span>Cervejas</span>
+              <div class="cat-bar"><i style="width: 76%"></i></div>
+              <strong>76%</strong>
+            </div>
+            <div class="category-item" data-category="Vinhos">
+              <span>Vinhos</span>
+              <div class="cat-bar"><i style="width: 68%"></i></div>
+              <strong>68%</strong>
+            </div>
+            <div class="category-item" data-category="Destilados">
+              <span>Destilados</span>
+              <div class="cat-bar"><i style="width: 58%"></i></div>
+              <strong>58%</strong>
+            </div>
+            <div class="category-item" data-category="Petiscos">
+              <span>Petiscos</span>
+              <div class="cat-bar"><i style="width: 44%"></i></div>
+              <strong>44%</strong>
+            </div>
+          </div>
+        </article>
+      </section>
+
+      <section class="panel line-panel">
+        <div class="panel-head">
+          <h3>Receita x temperatura máxima</h3>
+        </div>
+
+        <div class="mini-chart">
+          <svg id="tempChart" viewBox="0 0 760 180" role="img" aria-label="Gráfico de linha da temperatura x receita"></svg>
+        </div>
+      </section>
+
+      <section class="panel table-panel">
+        <div class="panel-head">
+          <h3>Plano diário previsto</h3>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Dia</th>
+                <th>Receita</th>
+                <th>Int. v. e 5x</th>
+                <th>Itens</th>
+                <th>Vendas</th>
+              </tr>
+            </thead>
+            <tbody id="demandTableBody"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+
+    <script src ="script.js"></script>
+  </body>
+</html>
